@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klecken → Harburg</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 1.2rem; margin: 0 0 4px; }
+  #stand { font-size: .8rem; opacity: .7; margin-bottom: 12px; }
+  .zug { display: flex; justify-content: space-between; align-items: center;
+         padding: 12px; margin-bottom: 8px; border-radius: 10px; border: 1px solid #8884; }
+  .zeit { font-size: 1.6rem; font-weight: 600; }
+  .ziel { font-size: .85rem; opacity: .8; }
+  .status { font-weight: 600; text-align: right; }
+  .puenktlich { color: #1a8f3c; }
+  .spaet { color: #d97706; }
+  .ausfall { color: #dc2626; }
+  .zug.ausfall-box { opacity: .7; }
+  #fehler { color: #dc2626; white-space: pre-wrap; }
+  button { margin-top: 8px; padding: 8px 14px; border-radius: 8px; border: 1px solid #8886; background: none; color: inherit; }
+</style>
+</head>
+<body>
+  <h1>Klecken → Harburg</h1>
+  <div id="stand">Lade …</div>
+  <div id="liste"></div>
+  <div id="fehler"></div>
+  <button onclick="laden()">Aktualisieren</button>
+
+<script>
+const STATION = "Klecken";
+const URL_API = "https://dbf.finalrewind.org/" + encodeURIComponent(STATION)
+              + "?version=3&mode=json&admode=dep&limit=12";
+const ZIEL_FILTER = /harburg|hamburg/i;   // Richtung Harburg / Hamburg
+
+function minuten(zeit) { // "HH:MM" -> Minuten
+  const [h, m] = String(zeit).split(":").map(Number);
+  return h * 60 + m;
+}
+
+function zeigeZug(d) {
+  const geplant = d.scheduledDeparture || d.scheduledArrival || "";
+  const verspaetung = d.delayDeparture ?? d.delayArrival ?? 0;
+  const ausgefallen = d.isCancelled || d.isCancelled === 1;
+
+  let klasse = "puenktlich", text = "pünktlich";
+  if (ausgefallen) { klasse = "ausfall"; text = "fällt aus"; }
+  else if (verspaetung > 0) { klasse = "spaet"; text = "+" + verspaetung + " min"; }
+
+  let tatsaechlich = "";
+  if (!ausgefallen && verspaetung > 0 && /^\d{1,2}:\d{2}$/.test(geplant)) {
+    const t = (minuten(geplant) + verspaetung) % 1440;
+    tatsaechlich = String(Math.floor(t / 60)).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0");
+  }
+
+  const el = document.createElement("div");
+  el.className = "zug" + (ausgefallen ? " ausfall-box" : "");
+  el.innerHTML =
+    '<div><div class="zeit">' + geplant + '</div>' +
+    '<div class="ziel">' + (d.train || d.line || "") + ' → ' + (d.destination || "") +
+    (d.platform ? ' · Gl. ' + d.platform : '') + '</div></div>' +
+    '<div class="status ' + klasse + '">' + text +
+    (tatsaechlich ? '<div class="ziel">ab ' + tatsaechlich + '</div>' : '') + '</div>';
+  return el;
+}
+
+async function laden() {
+  const liste = document.getElementById("liste");
+  const fehler = document.getElementById("fehler");
+  const stand = document.getElementById("stand");
+  fehler.textContent = "";
+  try {
+    const antwort = await fetch(URL_API);
+    if (!antwort.ok) throw new Error("HTTP " + antwort.status);
+    const daten = await antwort.json();
+    if (daten.error) throw new Error(daten.error);
+
+    let abfahrten = daten.departures || [];
+    const gefiltert = abfahrten.filter(d =>
+      ZIEL_FILTER.test(d.destination || "") ||
+      (d.via || []).some(v => ZIEL_FILTER.test(typeof v === "string" ? v : (v.name || "")))
+    );
+    if (gefiltert.length) abfahrten = gefiltert;
+
+    liste.innerHTML = "";
+    if (!abfahrten.length) liste.textContent = "Keine Abfahrten gefunden.";
+    abfahrten.slice(0, 6).forEach(d => liste.appendChild(zeigeZug(d)));
+    stand.textContent = "Stand: " + new Date().toLocaleTimeString("de-DE");
+  } catch (e) {
+    stand.textContent = "Fehler beim Laden";
+    fehler.textContent = e.message +
+      "\n\nFalls hier 'Failed to fetch' steht, blockiert vermutlich CORS die Anfrage " +
+      "(Details in der Browser-Konsole, F12).";
+  }
+}
+
+laden();
+setInterval(laden, 60000); // jede Minute neu laden
+</script>
+</body>
+</html>
