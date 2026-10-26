@@ -1,106 +1,321 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Klecken → Harburg</title>
-<style>
-  :root { color-scheme: light dark; }
-  body { font-family: system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 16px; }
-  h1 { font-size: 1.2rem; margin: 0 0 4px; }
-  #stand { font-size: .8rem; opacity: .7; margin-bottom: 12px; }
-  .zug { display: flex; justify-content: space-between; align-items: center;
-         padding: 12px; margin-bottom: 8px; border-radius: 10px; border: 1px solid #8884; }
-  .zeit { font-size: 1.6rem; font-weight: 600; }
-  .ziel { font-size: .85rem; opacity: .8; }
-  .status { font-weight: 600; text-align: right; }
-  .puenktlich { color: #1a8f3c; }
-  .spaet { color: #d97706; }
-  .ausfall { color: #dc2626; }
-  .zug.ausfall-box { opacity: .7; }
-  #fehler { color: #dc2626; white-space: pre-wrap; }
-  button { margin-top: 8px; padding: 8px 14px; border-radius: 8px; border: 1px solid #8886; background: none; color: inherit; }
-</style>
-<!-- GoatCounter -->
-<script data-goatcounter="https://dorfcodemetronom.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>metronom Klecken ⇄ Harburg</title>
+    <style>
+        /* Base Styling */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.5;
+            margin: 0;
+            padding: 15px 10px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        /* Headings */
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 1.4rem;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #546575;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Menu Items */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid #e1e8ed;
+            border-radius: 6px;
+            background-color: #fafbfc;
+            overflow: hidden;
+        }
+
+        summary {
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 14px;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #34495e;
+            outline-offset: -2px;
+        }
+
+        summary:focus-visible {
+            outline: 2px solid #3498db;
+            background-color: #f0f7fc;
+        }
+
+        summary::-webkit-details-marker { display: none; }
+        summary::marker { display: none; }
+
+        /* Custom Plus/Minus Icon */
+        summary:after {
+            content: '+';
+            font-size: 1.3em;
+            color: #3498db;
+            line-height: 1;
+            transition: transform 0.2s ease;
+            margin-left: 10px;
+        }
+
+        details[open] summary:after {
+            transform: rotate(45deg);
+            color: #e74c3c;
+        }
+
+        /* Content */
+        .faq-content {
+            padding: 0 14px 14px 14px;
+            font-size: 0.9rem;
+            color: #444;
+            background-color: #ffffff;
+            border-top: 1px solid #e1e8ed;
+        }
+
+        .stand {
+            font-size: 0.8rem;
+            color: #666;
+            margin: 10px 0 8px;
+        }
+
+        /* Train cards */
+        .zug {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border: 1px solid #e1e8ed;
+            border-radius: 6px;
+            background-color: #fafbfc;
+        }
+
+        .zeit {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .info {
+            font-size: 0.8rem;
+            color: #546575;
+        }
+
+        .grund {
+            font-size: 0.78rem;
+            color: #d97706;
+            margin-top: 2px;
+        }
+
+        .status {
+            font-weight: 600;
+            text-align: right;
+            white-space: nowrap;
+            margin-left: 10px;
+        }
+
+        .puenktlich { color: #1a8f3c; }
+        .spaet { color: #d97706; }
+        .ausfall { color: #e74c3c; }
+        .zug.ausgefallen .zeit { text-decoration: line-through; color: #999; }
+
+        .fehler {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+        }
+
+        button {
+            margin-top: 4px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: 1px solid #3498db;
+            background: #ffffff;
+            color: #3498db;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        button:hover { background: #f0f7fc; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 480px) {
+            body { padding: 10px 5px; }
+            .container { padding: 15px 12px; }
+            summary { font-size: 0.9rem; padding: 12px; }
+            .faq-content { font-size: 0.85rem; padding: 0 12px 12px 12px; }
+        }
+    </style>
+    <!-- GoatCounter -->
+    <script data-goatcounter="https://dorfcodemetronom.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
-  <h1>Klecken → Harburg</h1>
-  <div id="stand">Lade …</div>
-  <div id="liste"></div>
-  <div id="fehler"></div>
-  <button onclick="laden()">Aktualisieren</button>
+
+    <div class="container">
+        <h1>metronom Klecken ⇄ Harburg</h1>
+        <p class="subtitle">Die nächsten Verbindungen mit Echtzeit-Verspätung</p>
+
+        <details data-station="Klecken" data-richtung="harburg">
+            <summary>Klecken → Harburg</summary>
+            <div class="faq-content">
+                <div class="stand">Lade …</div>
+                <div class="liste"></div>
+                <div class="fehler"></div>
+                <button type="button">Aktualisieren</button>
+            </div>
+        </details>
+
+        <details data-station="Hamburg-Harburg" data-richtung="klecken">
+            <summary>Harburg → Klecken</summary>
+            <div class="faq-content">
+                <div class="stand">Lade …</div>
+                <div class="liste"></div>
+                <div class="fehler"></div>
+                <button type="button">Aktualisieren</button>
+            </div>
+        </details>
+    </div>
+
+    <div class="footer">
+        &copy; 2026 DorfCode · Daten: dbf.finalrewind.org
+    </div>
 
 <script>
-const STATION = "Klecken";
-const URL_API = "https://dbf.finalrewind.org/" + encodeURIComponent(STATION)
-              + "?version=3&mode=json&admode=dep&limit=12";
-const ZIEL_FILTER = /harburg|hamburg/i;   // Richtung Harburg / Hamburg
+const ANZAHL = 3;
 
-function minuten(zeit) { // "HH:MM" -> Minuten
-  const [h, m] = String(zeit).split(":").map(Number);
-  return h * 60 + m;
+// Filter je Richtung
+const FILTER = {
+    // Ab Klecken: alle Züge Richtung Harburg/Hamburg
+    harburg: d => /harburg|hamburg/i.test(textVon(d.destination)) || hatHalt(d, /harburg/i),
+    // Ab Harburg: nur Züge, die in Klecken halten (RE4 hält dort nicht)
+    klecken: d => hatHalt(d, /klecken/i) || /klecken/i.test(textVon(d.destination))
+};
+
+function textVon(v) {
+    if (!v) return "";
+    return typeof v === "string" ? v : (v.name || "");
 }
 
-function zeigeZug(d) {
-  const geplant = d.scheduledDeparture || d.scheduledArrival || "";
-  const verspaetung = d.delayDeparture ?? d.delayArrival ?? 0;
-  const ausgefallen = d.isCancelled || d.isCancelled === 1;
-
-  let klasse = "puenktlich", text = "pünktlich";
-  if (ausgefallen) { klasse = "ausfall"; text = "fällt aus"; }
-  else if (verspaetung > 0) { klasse = "spaet"; text = "+" + verspaetung + " min"; }
-
-  let tatsaechlich = "";
-  if (!ausgefallen && verspaetung > 0 && /^\d{1,2}:\d{2}$/.test(geplant)) {
-    const t = (minuten(geplant) + verspaetung) % 1440;
-    tatsaechlich = String(Math.floor(t / 60)).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0");
-  }
-
-  const el = document.createElement("div");
-  el.className = "zug" + (ausgefallen ? " ausfall-box" : "");
-  el.innerHTML =
-    '<div><div class="zeit">' + geplant + '</div>' +
-    '<div class="ziel">' + (d.train || d.line || "") + ' → ' + (d.destination || "") +
-    (d.platform ? ' · Gl. ' + d.platform : '') + '</div></div>' +
-    '<div class="status ' + klasse + '">' + text +
-    (tatsaechlich ? '<div class="ziel">ab ' + tatsaechlich + '</div>' : '') + '</div>';
-  return el;
+function hatHalt(d, regex) {
+    const halte = [].concat(d.via || [], d.route || []);
+    return halte.some(h => regex.test(textVon(h)));
 }
 
-async function laden() {
-  const liste = document.getElementById("liste");
-  const fehler = document.getElementById("fehler");
-  const stand = document.getElementById("stand");
-  fehler.textContent = "";
-  try {
-    const antwort = await fetch(URL_API);
-    if (!antwort.ok) throw new Error("HTTP " + antwort.status);
-    const daten = await antwort.json();
-    if (daten.error) throw new Error(daten.error);
-
-    let abfahrten = daten.departures || [];
-    const gefiltert = abfahrten.filter(d =>
-      ZIEL_FILTER.test(d.destination || "") ||
-      (d.via || []).some(v => ZIEL_FILTER.test(typeof v === "string" ? v : (v.name || "")))
-    );
-    if (gefiltert.length) abfahrten = gefiltert;
-
-    liste.innerHTML = "";
-    if (!abfahrten.length) liste.textContent = "Keine Abfahrten gefunden.";
-    abfahrten.slice(0, 6).forEach(d => liste.appendChild(zeigeZug(d)));
-    stand.textContent = "Stand: " + new Date().toLocaleTimeString("de-DE");
-  } catch (e) {
-    stand.textContent = "Fehler beim Laden";
-    fehler.textContent = e.message +
-      "\n\nFalls hier 'Failed to fetch' steht, blockiert vermutlich CORS die Anfrage " +
-      "(Details in der Browser-Konsole, F12).";
-  }
+function minuten(zeit) {
+    const [h, m] = String(zeit).split(":").map(Number);
+    return h * 60 + m;
 }
 
-laden();
-setInterval(laden, 60000); // jede Minute neu laden
+// Verspätungsgründe und Hinweise aus der API (messages.delay / messages.qos)
+function meldungen(d) {
+    const m = d.messages || {};
+    const texte = [].concat(m.delay || [], m.qos || [])
+        .map(x => (typeof x === "string" ? x : (x.text || "")).trim())
+        .filter(Boolean);
+    const eindeutig = [...new Set(texte)];  // doppelte Meldungen entfernen
+    return eindeutig.map(t => t.replace(/[<>&]/g, "")).join(" · ");
+}
+
+function zugElement(d) {
+    const geplant = d.scheduledDeparture || d.scheduledArrival || "";
+    const verspaetung = d.delayDeparture ?? d.delayArrival ?? 0;
+    const ausgefallen = !!d.isCancelled;
+
+    let klasse = "puenktlich", text = "pünktlich";
+    if (ausgefallen) { klasse = "ausfall"; text = "fällt aus"; }
+    else if (verspaetung > 0) { klasse = "spaet"; text = "+" + verspaetung + " min"; }
+
+    let tatsaechlich = "";
+    if (!ausgefallen && verspaetung > 0 && /^\d{1,2}:\d{2}$/.test(geplant)) {
+        const t = (minuten(geplant) + verspaetung) % 1440;
+        tatsaechlich = String(Math.floor(t / 60)).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0");
+    }
+
+    const gruende = meldungen(d);
+
+    const el = document.createElement("div");
+    el.className = "zug" + (ausgefallen ? " ausgefallen" : "");
+    el.innerHTML =
+        '<div><div class="zeit">' + geplant + '</div>' +
+        '<div class="info">' + (d.train || d.line || "") + ' → ' + textVon(d.destination) +
+        (d.platform ? ' · Gl. ' + d.platform : '') + '</div>' +
+        (gruende ? '<div class="grund">' + gruende + '</div>' : '') + '</div>' +
+        '<div class="status ' + klasse + '">' + text +
+        (tatsaechlich ? '<div class="info">ab ' + tatsaechlich + '</div>' : '') + '</div>';
+    return el;
+}
+
+async function laden(box) {
+    const station = box.dataset.station;
+    const filter = FILTER[box.dataset.richtung];
+    const liste = box.querySelector(".liste");
+    const fehler = box.querySelector(".fehler");
+    const stand = box.querySelector(".stand");
+    fehler.textContent = "";
+
+    const url = "https://dbf.finalrewind.org/" + encodeURIComponent(station)
+              + "?version=3&mode=json&admode=dep&limit=60";
+    try {
+        const antwort = await fetch(url);
+        if (!antwort.ok) throw new Error("HTTP " + antwort.status);
+        const daten = await antwort.json();
+        if (daten.error) throw new Error(daten.error);
+
+        const abfahrten = (daten.departures || []).filter(filter).slice(0, ANZAHL);
+
+        liste.innerHTML = "";
+        if (!abfahrten.length) liste.textContent = "Keine passenden Abfahrten gefunden.";
+        abfahrten.forEach(d => liste.appendChild(zugElement(d)));
+        stand.textContent = "Stand: " + new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+    } catch (e) {
+        stand.textContent = "Fehler beim Laden";
+        fehler.textContent = e.message;
+    }
+}
+
+document.querySelectorAll("details").forEach(box => {
+    // Beim Aufklappen laden
+    box.addEventListener("toggle", () => { if (box.open) laden(box); });
+    box.querySelector("button").addEventListener("click", () => laden(box));
+});
+
+// Offene Menüpunkte jede Minute aktualisieren
+setInterval(() => {
+    document.querySelectorAll("details[open]").forEach(laden);
+}, 60000);
 </script>
+
 </body>
 </html>
