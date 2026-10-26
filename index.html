@@ -119,6 +119,15 @@
             color: #2c3e50;
         }
 
+        .zeit .alt {
+            text-decoration: line-through;
+            color: #999;
+            font-weight: 400;
+            font-size: 1.1rem;
+        }
+
+        .zeit .neu { color: #d97706; }
+
         .info {
             font-size: 0.8rem;
             color: #546575;
@@ -187,7 +196,7 @@
         <h1>metronom Klecken ⇄ Harburg</h1>
         <p class="subtitle">Die nächsten Verbindungen mit Echtzeit-Verspätung</p>
 
-        <details data-station="Klecken" data-richtung="harburg">
+        <details data-station="Klecken" data-via="Harburg" data-richtung="harburg">
             <summary>Klecken → Harburg</summary>
             <div class="faq-content">
                 <div class="stand">Lade …</div>
@@ -215,23 +224,9 @@
 <script>
 const ANZAHL = 3;
 
-// Filter je Richtung
-const FILTER = {
-    // Ab Klecken: alle Züge Richtung Harburg/Hamburg
-    harburg: d => /harburg|hamburg/i.test(textVon(d.destination)) || hatHalt(d, /harburg/i),
-    // Ab Harburg: Der Server liefert per via=Klecken nur Züge über Klecken.
-    // Sicherheitshalber Züge mit Ziel Hamburg aussortieren (falsche Richtung).
-    klecken: d => !/hamburg/i.test(textVon(d.destination))
-};
-
 function textVon(v) {
     if (!v) return "";
     return typeof v === "string" ? v : (v.name || "");
-}
-
-function hatHalt(d, regex) {
-    const halte = [].concat(d.via || [], d.route || []);
-    return halte.some(h => regex.test(textVon(h)));
 }
 
 function minuten(zeit) {
@@ -269,18 +264,20 @@ function zugElement(d) {
     const el = document.createElement("div");
     el.className = "zug" + (ausgefallen ? " ausgefallen" : "");
     el.innerHTML =
-        '<div><div class="zeit">' + geplant + '</div>' +
+        '<div><div class="zeit">' +
+        (tatsaechlich
+            ? '<span class="alt">' + geplant + '</span> <span class="neu">' + tatsaechlich + '</span>'
+            : geplant) +
+        '</div>' +
         '<div class="info">' + (d.train || d.line || "") + ' → ' + textVon(d.destination) +
         (d.platform ? ' · Gl. ' + d.platform : '') + '</div>' +
         (gruende ? '<div class="grund">' + gruende + '</div>' : '') + '</div>' +
-        '<div class="status ' + klasse + '">' + text +
-        (tatsaechlich ? '<div class="info">ab ' + tatsaechlich + '</div>' : '') + '</div>';
+        '<div class="status ' + klasse + '">' + text + '</div>';
     return el;
 }
 
 async function laden(box) {
     const station = box.dataset.station;
-    const filter = FILTER[box.dataset.richtung];
     const liste = box.querySelector(".liste");
     const fehler = box.querySelector(".fehler");
     const stand = box.querySelector(".stand");
@@ -295,7 +292,8 @@ async function laden(box) {
         const daten = await antwort.json();
         if (daten.error) throw new Error(daten.error);
 
-        const abfahrten = (daten.departures || []).filter(filter).slice(0, ANZAHL);
+        // Richtung wird über den via-Parameter bereits vom Server gefiltert
+        const abfahrten = (daten.departures || []).slice(0, ANZAHL);
 
         liste.innerHTML = "";
         if (!abfahrten.length) liste.textContent = "Keine passenden Abfahrten gefunden.";
