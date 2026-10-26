@@ -146,6 +146,13 @@
             margin-left: 10px;
         }
 
+        .gleis {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-top: 2px;
+        }
+
         .puenktlich { color: #1a8f3c; }
         .spaet { color: #d97706; }
         .ausfall { color: #e74c3c; }
@@ -278,10 +285,10 @@ function zugElement(d) {
             ? '<span class="alt">' + geplant + '</span> <span class="neu">' + tatsaechlich + '</span>'
             : geplant) +
         '</div>' +
-        '<div class="info">' + (d.train || d.line || "") + ' → ' + textVon(d.destination) +
-        (d.platform ? ' · Gl. ' + d.platform : '') + '</div>' +
+        '<div class="info">' + (d.train || d.line || "") + ' → ' + textVon(d.destination) + '</div>' +
         (gruende ? '<div class="grund">' + gruende + '</div>' : '') + '</div>' +
-        '<div class="status ' + klasse + '">' + text + '</div>';
+        '<div class="status"><div class="' + klasse + '">' + text + '</div>' +
+        (d.platform ? '<div class="gleis">Gleis ' + d.platform + '</div>' : '') + '</div>';
     return el;
 }
 
