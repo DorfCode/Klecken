@@ -95,10 +95,30 @@
             border-top: 1px solid #e1e8ed;
         }
 
+        .meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0 8px;
+        }
+
         .stand {
             font-size: 0.8rem;
             color: #666;
-            margin: 10px 0 8px;
+        }
+
+        .timer {
+            font-size: 0.75rem;
+            color: #546575;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .timer.warn {
+            color: #d97706;
+            font-weight: 600;
         }
 
         /* Train cards */
@@ -164,19 +184,6 @@
             white-space: pre-wrap;
         }
 
-        button {
-            margin-top: 4px;
-            padding: 8px 14px;
-            border-radius: 6px;
-            border: 1px solid #3498db;
-            background: #ffffff;
-            color: #3498db;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-
-        button:hover { background: #f0f7fc; }
-
         /* Footer */
         .footer {
             text-align: center;
@@ -215,40 +222,48 @@
         <details data-station="Klecken" data-via="Harburg" data-richtung="harburg">
             <summary>Klecken → Harburg</summary>
             <div class="faq-content">
-                <div class="stand">Lade …</div>
+                <div class="meta">
+                    <div class="stand">Lade …</div>
+                    <div class="timer" aria-live="polite">Aktualisierung in 60s</div>
+                </div>
                 <div class="liste"></div>
                 <div class="fehler"></div>
-                <button type="button">Aktualisieren</button>
             </div>
         </details>
 
         <details data-station="Hamburg-Harburg" data-via="Klecken" data-richtung="klecken">
             <summary>Harburg → Klecken</summary>
             <div class="faq-content">
-                <div class="stand">Lade …</div>
+                <div class="meta">
+                    <div class="stand">Lade …</div>
+                    <div class="timer" aria-live="polite">Aktualisierung in 60s</div>
+                </div>
                 <div class="liste"></div>
                 <div class="fehler"></div>
-                <button type="button">Aktualisieren</button>
             </div>
         </details>
 
         <details data-station="Klecken" data-via="Hamburg Hbf" data-richtung="Hamburg Hbf">
             <summary>Klecken → Hamburg HBF</summary>
             <div class="faq-content">
-                <div class="stand">Lade …</div>
+                <div class="meta">
+                    <div class="stand">Lade …</div>
+                    <div class="timer" aria-live="polite">Aktualisierung in 60s</div>
+                </div>
                 <div class="liste"></div>
                 <div class="fehler"></div>
-                <button type="button">Aktualisieren</button>
             </div>
         </details>
 
         <details data-station="Hamburg Hbf" data-via="Klecken" data-richtung="klecken">
             <summary>Hamburg HBF → Klecken</summary>
             <div class="faq-content">
-                <div class="stand">Lade …</div>
+                <div class="meta">
+                    <div class="stand">Lade …</div>
+                    <div class="timer" aria-live="polite">Aktualisierung in 60s</div>
+                </div>
                 <div class="liste"></div>
                 <div class="fehler"></div>
-                <button type="button">Aktualisieren</button>
             </div>
         </details>
         
@@ -260,6 +275,7 @@
 
 <script>
 const ANZAHL = 3;
+const REFRESH_SECONDS = 60;
 
 function textVon(v) {
     if (!v) return "";
@@ -269,6 +285,40 @@ function textVon(v) {
 function minuten(zeit) {
     const [h, m] = String(zeit).split(":").map(Number);
     return h * 60 + m;
+}
+
+function setTimerText(box, remaining) {
+    const timer = box.querySelector(".timer");
+    if (!timer) return;
+    timer.textContent = "Aktualisierung in " + remaining + "s";
+    timer.classList.toggle("warn", remaining <= 10);
+}
+
+function startRefreshCountdown(box) {
+    if (box._refreshTimer) {
+        clearInterval(box._refreshTimer);
+    }
+
+    let remaining = REFRESH_SECONDS;
+    setTimerText(box, remaining);
+
+    box._refreshTimer = setInterval(() => {
+        if (!box.open) {
+            clearInterval(box._refreshTimer);
+            box._refreshTimer = null;
+            return;
+        }
+
+        remaining -= 1;
+        if (remaining <= 0) {
+            clearInterval(box._refreshTimer);
+            box._refreshTimer = null;
+            laden(box);
+            return;
+        }
+
+        setTimerText(box, remaining);
+    }, 1000);
 }
 
 // Verspätungsgründe und Hinweise aus der API (messages.delay / messages.qos)
@@ -336,22 +386,24 @@ async function laden(box) {
         if (!abfahrten.length) liste.textContent = "Keine passenden Abfahrten gefunden.";
         abfahrten.forEach(d => liste.appendChild(zugElement(d)));
         stand.textContent = "Stand: " + new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+        startRefreshCountdown(box);
     } catch (e) {
         stand.textContent = "Fehler beim Laden";
         fehler.textContent = e.message;
+        startRefreshCountdown(box);
     }
 }
 
 document.querySelectorAll("details").forEach(box => {
-    // Beim Aufklappen laden
-    box.addEventListener("toggle", () => { if (box.open) laden(box); });
-    box.querySelector("button").addEventListener("click", () => laden(box));
+    box.addEventListener("toggle", () => {
+        if (box.open) {
+            laden(box);
+        } else if (box._refreshTimer) {
+            clearInterval(box._refreshTimer);
+            box._refreshTimer = null;
+        }
+    });
 });
-
-// Offene Menüpunkte jede Minute aktualisieren
-setInterval(() => {
-    document.querySelectorAll("details[open]").forEach(laden);
-}, 60000);
 </script>
 
 </body>
