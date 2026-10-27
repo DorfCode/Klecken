@@ -1,6 +1,6 @@
 {
-  "name": "Taktgefühl",
-  "short_name": "Taktgefühl",
+  "name": "Klecken",
+  "short_name": "Klecken",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
