@@ -1,432 +1,207 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>metronometer</title>
-    <style>
-        /* Base Styling */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
-            line-height: 1.5;
-            margin: 0;
-            padding: 15px 10px;
-        }
-
-        /* Container */
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 20px 8px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-
-        /* Headings */
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            font-size: 1.4rem;
-            margin-top: 5px;
-            margin-bottom: 20px;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #546575;
-            margin: 18px 0 0;
-            padding-top: 12px;
-            border-top: 1px solid #edf2f5;
-            font-size: 0.9rem;
-        }
-
-        /* Menu Items */
-        details {
-            margin-bottom: 10px;
-            border: 1px solid #e1e8ed;
-            border-radius: 6px;
-            background-color: #fafbfc;
-            overflow: hidden;
-        }
-
-        summary {
-            font-weight: 600;
-            font-size: 0.95rem;
-            padding: 14px;
-            cursor: pointer;
-            list-style: none;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #34495e;
-            outline-offset: -2px;
-        }
-
-        summary:focus-visible {
-            outline: 2px solid #3498db;
-            background-color: #f0f7fc;
-        }
-
-        summary::-webkit-details-marker { display: none; }
-        summary::marker { display: none; }
-
-        /* Custom Plus/Minus Icon */
-        summary:after {
-            content: '+';
-            font-size: 1.3em;
-            color: #3498db;
-            line-height: 1;
-            transition: transform 0.2s ease;
-            margin-left: 10px;
-        }
-
-        details[open] summary:after {
-            transform: rotate(45deg);
-            color: #e74c3c;
-        }
-
-        /* Content */
-        .faq-content {
-            padding: 0 8px 0 8px;
-            font-size: 0.9rem;
-            color: #444;
-            background-color: #ffffff;
-            border-top: 1px solid #e1e8ed;
-        }
-
-        .liste {
-            margin-top: 8px;
-        }
-
-        .meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-            margin-bottom: 8px;
-        }
-
-        .stand {
-            font-size: 0.8rem;
-            color: #666;
-        }
-
-        .timer {
-            font-size: 0.72rem;
-            color: #7a8794;
-            letter-spacing: 0.01em;
-            white-space: nowrap;
-            user-select: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .timer .symbol {
-            font-size: 0.9rem;
-            line-height: 1;
-            transform: translateY(-1px);
-        }
-
-        /* Train cards */
-        .zug {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 12px;
-            margin-bottom: 8px;
-            border: 1px solid #e1e8ed;
-            border-radius: 6px;
-            background-color: #fafbfc;
-        }
-
-        .zeit {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .zeit .alt {
-            text-decoration: line-through;
-            color: #999;
-            font-weight: 400;
-            font-size: 1.1rem;
-        }
-
-        .zeit .neu { color: #d97706; }
-
-        .info {
-            font-size: 0.8rem;
-            color: #546575;
-        }
-
-        .grund {
-            font-size: 0.78rem;
-            color: #d97706;
-            margin-top: 2px;
-        }
-
-        .status {
-            font-weight: 600;
-            text-align: right;
-            white-space: nowrap;
-            margin-left: 10px;
-        }
-
-        .gleis {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-top: 2px;
-        }
-
-        .puenktlich { color: #1a8f3c; }
-        .spaet { color: #d97706; }
-        .ausfall { color: #e74c3c; }
-        .zug.ausgefallen .zeit { text-decoration: line-through; color: #999; }
-
-        .fehler {
-            color: #e74c3c;
-            font-size: 0.85rem;
-            white-space: pre-wrap;
-            margin-top: 8px;
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            margin-top: 10px;
-            color: #666;
-            font-size: 0.8rem;
-        }
-
-        .footer a {
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        .footer .heart {
-            color: #e74c3c;
-            font-size: 1.1em;
-            vertical-align: middle;
-            margin: 0 0.15em;
-        }
-
-        /* Mobile Optimization */
-        @media (max-width: 480px) {
-            body { padding: 10px 5px; }
-            .container { padding: 15px 8px; }
-            summary { font-size: 0.9rem; padding: 12px; }
-            .faq-content { font-size: 0.85rem; padding: 0 8px 0px 8px; }
-        }
-    </style>
-    <!-- GoatCounter -->
-    <script data-goatcounter="https://dorfcodemetronom.goatcounter.com/count"
-            async src="//gc.zgo.at/count.js"></script>
-</head>
-<body>
-
-    <div class="container">
-        <h1>metronometer</h1>
-
-        <details data-station="Klecken" data-via="Harburg" data-richtung="harburg">
-            <summary>Klecken → Harburg</summary>
-            <div class="faq-content">
-                <div class="liste"></div>
-                <div class="meta">
-                    <div class="stand">Lade …</div>
-                    <div class="timer" aria-live="polite"><span class="symbol">↻</span> <span class="value"></span></div>
-                </div>
-                <div class="fehler"></div>
-            </div>
-        </details>
-
-        <details data-station="Klecken" data-via="Hamburg Hbf" data-richtung="Hamburg Hbf">
-            <summary>Klecken → Hamburg HBF</summary>
-            <div class="faq-content">
-                <div class="liste"></div>
-                <div class="meta">
-                    <div class="stand">Lade …</div>
-                    <div class="timer" aria-live="polite"><span class="symbol">↻</span> <span class="value"></span></div>
-                </div>
-                <div class="fehler"></div>
-            </div>
-        </details>
-
-        <details data-station="Hamburg-Harburg" data-via="Klecken" data-richtung="klecken">
-            <summary>Harburg → Klecken</summary>
-            <div class="faq-content">
-                <div class="liste"></div>
-                <div class="meta">
-                    <div class="stand">Lade …</div>
-                    <div class="timer" aria-live="polite"><span class="symbol">↻</span> <span class="value"></span></div>
-                </div>
-                <div class="fehler"></div>
-            </div>
-        </details>
-
-        <details data-station="Hamburg Hbf" data-via="Klecken" data-richtung="klecken">
-            <summary>Hamburg HBF → Klecken</summary>
-            <div class="faq-content">
-                <div class="liste"></div>
-                <div class="meta">
-                    <div class="stand">Lade …</div>
-                    <div class="timer" aria-live="polite"><span class="symbol">↻</span> <span class="value"></span></div>
-                </div>
-                <div class="fehler"></div>
-            </div>
-        </details>
-
-        <p class="footer">Datenquelle: dbf.finalrewind.org</p>
-    </div>
-
-    <div class="footer">
-        &copy; 2026 <a href="mailto:dorfcode@icloud.com">DorfCode</a> (<span class="heart" aria-hidden="true">♥</span>) (<a href="https://paypal.me/oleluehrs/1" target="_blank" rel="noopener no referrer">PayPal 1€</a>)
-    </div>
-
-<script>
-const ANZAHL = 3;
-const REFRESH_SECONDS = 60;
-
-function textVon(v) {
-    if (!v) return "";
-    return typeof v === "string" ? v : (v.name || "");
+/* 1. Global Box-Sizing: Prevents borders and paddings from breaking layouts */
+*, *::before, *::after {
+    box-sizing: border-box;
 }
 
-function minuten(zeit) {
-    const [h, m] = String(zeit).split(":").map(Number);
-    return h * 60 + m;
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    line-height: 1.5;
+    margin: 0;
+    padding: 16px 12px; /* Clean 4px-grid */
 }
 
-function setTimerText(box, remaining) {
-    const timerValue = box.querySelector(".value");
-    if (!timerValue) return;
-
-    const displayValue = remaining % 10 === 0 ? remaining : Math.ceil(remaining / 10) * 10;
-    timerValue.textContent = displayValue + "s";
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 16px; /* Consistent inner padding */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
-function startRefreshCountdown(box) {
-    if (box._refreshTimer) {
-        clearInterval(box._refreshTimer);
-    }
-
-    let remaining = REFRESH_SECONDS;
-    setTimerText(box, remaining);
-
-    box._refreshTimer = setInterval(() => {
-        if (!box.open) {
-            clearInterval(box._refreshTimer);
-            box._refreshTimer = null;
-            return;
-        }
-
-        remaining -= 1;
-        if (remaining <= 0) {
-            clearInterval(box._refreshTimer);
-            box._refreshTimer = null;
-            laden(box);
-            return;
-        }
-
-        if (remaining % 10 === 0 || remaining === REFRESH_SECONDS - 1) {
-            setTimerText(box, remaining);
-        }
-    }, 1000);
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    font-size: 1.4rem;
+    margin: 0 0 16px 0;
 }
 
-// Verspätungsgründe und Hinweise aus der API (messages.delay / messages.qos)
-function meldungen(d) {
-    const m = d.messages || {};
-    const texte = [].concat(m.delay || [], m.qos || [])
-        .map(x => (typeof x === "string" ? x : (x.text || "")).trim())
-        .filter(Boolean);
-    const eindeutig = [...new Set(texte)];  // doppelte Meldungen entfernen
-    return eindeutig.map(t => t.replace(/[<>&]/g, "")).join(" · ");
+/* Accordion Box */
+details {
+    margin-bottom: 8px;
+    border: 1px solid #e1e8ed;
+    border-radius: 6px;
+    background-color: #fafbfc;
+    overflow: hidden;
 }
 
-function zugElement(d) {
-    const geplant = d.scheduledDeparture || d.scheduledArrival || "";
-    const verspaetung = d.delayDeparture ?? d.delayArrival ?? 0;
-    const ausgefallen = !!d.isCancelled;
-
-    let klasse = "puenktlich", text = "pünktlich";
-    if (ausgefallen) { klasse = "ausfall"; text = "fällt aus"; }
-    else if (verspaetung > 0) { klasse = "spaet"; text = "+" + verspaetung + " min"; }
-
-    let tatsaechlich = "";
-    if (!ausgefallen && verspaetung > 0 && /^\d{1,2}:\d{2}$/.test(geplant)) {
-        const t = (minuten(geplant) + verspaetung) % 1440;
-        tatsaechlich = String(Math.floor(t / 60)).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0");
-    }
-
-    const gruende = meldungen(d);
-
-    const el = document.createElement("div");
-    el.className = "zug" + (ausgefallen ? " ausgefallen" : "");
-    el.innerHTML =
-        '<div><div class="zeit">' +
-        (tatsaechlich
-            ? '<span class="alt">' + geplant + '</span> <span class="neu">' + tatsaechlich + '</span>'
-            : geplant) +
-        '</div>' +
-        '<div class="info">' + (d.train || d.line || "") + ' → ' + textVon(d.destination) + '</div>' +
-        (gruende ? '<div class="grund">' + gruende + '</div>' : '') + '</div>' +
-        '<div class="status"><div class="' + klasse + '">' + text + '</div>' +
-        (d.platform ? '<div class="gleis">Gleis ' + d.platform + '</div>' : '') + '</div>';
-    return el;
+summary {
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 12px 14px; /* Matches the content below */
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #34495e;
 }
 
-async function laden(box) {
-    const station = box.dataset.station;
-    const liste = box.querySelector(".liste");
-    const fehler = box.querySelector(".fehler");
-    const stand = box.querySelector(".stand");
-    fehler.textContent = "";
-
-    const url = "https://dbf.finalrewind.org/" + encodeURIComponent(station)
-              + "?version=3&mode=json&admode=dep&limit=60"
-              + (box.dataset.via ? "&via=" + encodeURIComponent(box.dataset.via) : "");
-    try {
-        const antwort = await fetch(url);
-        if (!antwort.ok) throw new Error("HTTP " + antwort.status);
-        const daten = await antwort.json();
-        if (daten.error) throw new Error(daten.error);
-
-        // Richtung wird über den via-Parameter bereits vom Server gefiltert
-        const abfahrten = (daten.departures || []).slice(0, ANZAHL);
-
-        liste.innerHTML = "";
-        if (!abfahrten.length) liste.textContent = "Keine passenden Abfahrten gefunden.";
-        abfahrten.forEach(d => liste.appendChild(zugElement(d)));
-        stand.textContent = "Stand: " + new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-        startRefreshCountdown(box);
-    } catch (e) {
-        stand.textContent = "Fehler beim Laden";
-        fehler.textContent = e.message;
-        startRefreshCountdown(box);
-    }
+summary:focus-visible {
+    outline: 2px solid #3498db;
+    background-color: #f0f7fc;
 }
 
-document.querySelectorAll("details").forEach(box => {
-    box.addEventListener("toggle", () => {
-        if (box.open) {
-            laden(box);
-        } else if (box._refreshTimer) {
-            clearInterval(box._refreshTimer);
-            box._refreshTimer = null;
-        }
-    });
-});
-</script>
+summary::-webkit-details-marker, summary::marker { display: none; }
 
-</body>
-</html>
+summary:after {
+    content: '+';
+    font-size: 1.3em;
+    color: #3498db;
+    line-height: 1;
+    transition: transform 0.2s ease;
+    margin-left: 10px;
+}
+
+details[open] summary:after {
+    transform: rotate(45deg);
+    color: #e74c3c;
+}
+
+/* Content Area: Uses gap instead of competing margins */
+.faq-content {
+    padding: 12px 14px; /* Matches summary padding so everything aligns */
+    font-size: 0.9rem;
+    color: #444;
+    background-color: #ffffff;
+    border-top: 1px solid #e1e8ed;
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Handles spacing between list, meta, and error automatically */
+}
+
+.liste {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Space between each train card */
+    margin: 0;
+}
+
+.meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 0;
+}
+
+.stand {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.timer {
+    font-size: 0.72rem;
+    color: #7a8794;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.timer .symbol {
+    font-size: 0.9rem;
+    line-height: 1;
+    transform: translateY(-1px);
+}
+
+/* Train Card */
+.zug {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    margin: 0; /* Margin removed: handled by parent .liste gap */
+    border: 1px solid #e1e8ed;
+    border-radius: 6px;
+    background-color: #fafbfc;
+}
+
+.zeit {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.zeit .alt {
+    text-decoration: line-through;
+    color: #999;
+    font-weight: 400;
+    font-size: 1.1rem;
+}
+
+.zeit .neu { color: #d97706; }
+
+.info {
+    font-size: 0.8rem;
+    color: #546575;
+}
+
+.grund {
+    font-size: 0.78rem;
+    color: #d97706;
+    margin-top: 2px;
+}
+
+.status {
+    font-weight: 600;
+    text-align: right;
+    white-space: nowrap;
+    margin-left: 10px;
+}
+
+.gleis {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-top: 2px;
+}
+
+.puenktlich { color: #1a8f3c; }
+.spaet { color: #d97706; }
+.ausfall { color: #e74c3c; }
+.zug.ausgefallen .zeit { text-decoration: line-through; color: #999; }
+
+.fehler {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    margin: 0;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 12px;
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.footer a { text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+.footer .heart {
+    color: #e74c3c;
+    font-size: 1.1em;
+    vertical-align: middle;
+    margin: 0 0.15em;
+}
+
+/* Mobile: Just reduce root padding slightly */
+@media (max-width: 480px) {
+    body { padding: 8px 6px; }
+    .container { padding: 12px 10px; }
+}
