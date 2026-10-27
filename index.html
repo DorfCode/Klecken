@@ -276,6 +276,7 @@
 <script>
 const ANZAHL = 3;
 const REFRESH_SECONDS = 60;
+const REFRESH_TEXT = "Aktualisierung in ";
 
 function textVon(v) {
     if (!v) return "";
@@ -290,7 +291,7 @@ function minuten(zeit) {
 function setTimerText(box, remaining) {
     const timer = box.querySelector(".timer");
     if (!timer) return;
-    timer.textContent = "Aktualisierung in " + remaining + "s";
+    timer.textContent = REFRESH_TEXT + remaining + "s";
     timer.classList.toggle("warn", remaining <= 10);
 }
 
