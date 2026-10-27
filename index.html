@@ -286,7 +286,9 @@ function minuten(zeit) {
 function setTimerText(box, remaining) {
     const timer = box.querySelector(".timer");
     if (!timer) return;
-    timer.textContent = REFRESH_TEXT + remaining + "s";
+
+    const displayValue = remaining % 10 === 0 ? remaining : Math.ceil(remaining / 10) * 10;
+    timer.textContent = REFRESH_TEXT + displayValue + "s";
 }
 
 function startRefreshCountdown(box) {
@@ -312,7 +314,9 @@ function startRefreshCountdown(box) {
             return;
         }
 
-        setTimerText(box, remaining);
+        if (remaining % 10 === 0 || remaining === REFRESH_SECONDS - 1) {
+            setTimerText(box, remaining);
+        }
     }, 1000);
 }
 
