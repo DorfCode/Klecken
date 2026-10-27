@@ -116,11 +116,6 @@
             user-select: none;
         }
 
-        .timer.warn {
-            color: #d97706;
-            font-weight: 600;
-        }
-
         /* Train cards */
         .zug {
             display: flex;
@@ -292,7 +287,6 @@ function setTimerText(box, remaining) {
     const timer = box.querySelector(".timer");
     if (!timer) return;
     timer.textContent = REFRESH_TEXT + remaining + "s";
-    timer.classList.toggle("warn", remaining <= 10);
 }
 
 function startRefreshCountdown(box) {
