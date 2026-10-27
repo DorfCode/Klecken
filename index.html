@@ -115,6 +115,15 @@
             letter-spacing: 0.01em;
             white-space: nowrap;
             user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .timer .symbol {
+            font-size: 0.8rem;
+            line-height: 1;
+            transform: translateY(-1px);
         }
 
         /* Train cards */
@@ -219,7 +228,7 @@
             <div class="faq-content">
                 <div class="meta">
                     <div class="stand">Lade …</div>
-                    <div class="timer" aria-live="polite"></div>
+                    <div class="timer" aria-live="polite"><span class="symbol">⟳</span> <span class="value"></span></div>
                 </div>
                 <div class="liste"></div>
                 <div class="fehler"></div>
@@ -231,7 +240,7 @@
             <div class="faq-content">
                 <div class="meta">
                     <div class="stand">Lade …</div>
-                    <div class="timer" aria-live="polite"></div>
+                    <div class="timer" aria-live="polite"><span class="symbol">⟳</span> <span class="value"></span></div>
                 </div>
                 <div class="liste"></div>
                 <div class="fehler"></div>
@@ -243,7 +252,7 @@
             <div class="faq-content">
                 <div class="meta">
                     <div class="stand">Lade …</div>
-                    <div class="timer" aria-live="polite"></div>
+                    <div class="timer" aria-live="polite"><span class="symbol">⟳</span> <span class="value"></span></div>
                 </div>
                 <div class="liste"></div>
                 <div class="fehler"></div>
@@ -255,7 +264,7 @@
             <div class="faq-content">
                 <div class="meta">
                     <div class="stand">Lade …</div>
-                    <div class="timer" aria-live="polite"></div>
+                    <div class="timer" aria-live="polite"><span class="symbol">⟳</span> <span class="value"></span></div>
                 </div>
                 <div class="liste"></div>
                 <div class="fehler"></div>
@@ -271,7 +280,6 @@
 <script>
 const ANZAHL = 3;
 const REFRESH_SECONDS = 60;
-const REFRESH_TEXT = "Aktualisierung in ";
 
 function textVon(v) {
     if (!v) return "";
@@ -284,11 +292,11 @@ function minuten(zeit) {
 }
 
 function setTimerText(box, remaining) {
-    const timer = box.querySelector(".timer");
-    if (!timer) return;
+    const timerValue = box.querySelector(".value");
+    if (!timerValue) return;
 
     const displayValue = remaining % 10 === 0 ? remaining : Math.ceil(remaining / 10) * 10;
-    timer.textContent = REFRESH_TEXT + displayValue + "s";
+    timerValue.textContent = displayValue + "s";
 }
 
 function startRefreshCountdown(box) {
