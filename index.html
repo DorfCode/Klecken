@@ -251,6 +251,31 @@
             margin: 0 0.15em;
         }
 
+        .qr-dialog {
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .qr-dialog::backdrop {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .qr-dialog img {
+            display: block;
+            width: min(70vw, 260px);
+            height: auto;
+            margin: 0 auto 12px;
+        }
+
+        .qr-dialog button {
+            font: inherit;
+            padding: 6px 16px;
+            cursor: pointer;
+        }
+
         /* Mobile Optimization */
         @media (max-width: 480px) {
             body { padding: 8px 6px; }
@@ -318,8 +343,13 @@
     </div>
 
     <div class="footer">
-        &copy; 2026 <a href="mailto:dorfcode@icloud.com?subject=Feedback%20zu%20metronometer">DorfCode</a> (<span class="heart" aria-hidden="true">♥</span> <a href="https://paypal.me/oleluehrs/1" target="_blank" rel="noopener noreferrer">PayPal 1€</a> )
+        &copy; 2026 <a href="mailto:dorfcode@icloud.com?subject=Feedback%20zu%20metronometer">DorfCode</a> (<span class="heart" aria-hidden="true">♥</span> <a href="https://paypal.me/oleluehrs/1" target="_blank" rel="noopener noreferrer">PayPal 1€</a> &middot; <a href="QRcode-metronometer.png" id="qr-link">QR to share</a> )
     </div>
+
+    <dialog id="qr-dialog" class="qr-dialog" aria-label="QR to share">
+        <img src="QRcode-metronometer.png" alt="QR code to share metronometer">
+        <button type="button" id="qr-close">Close</button>
+    </dialog>
 
 <script>
 const ANZAHL = 3;
@@ -454,6 +484,20 @@ document.querySelectorAll("details").forEach(box => {
         }
     });
 });
+
+(function () {
+    const dialog = document.getElementById('qr-dialog');
+    document.getElementById('qr-link').addEventListener('click', function (e) {
+        e.preventDefault();
+        dialog.showModal();
+    });
+    document.getElementById('qr-close').addEventListener('click', function () {
+        dialog.close();
+    });
+    dialog.addEventListener('click', function (e) {
+        if (e.target === dialog) dialog.close();
+    });
+})();
 </script>
 
 </body>
